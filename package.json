@@ -1,1 +1,36 @@
-
+{
+  "name": "toolsthatdontupload-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for Tools That Don't Upload — 500+ free tools that process files locally, never uploading them to a server.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "toolsthatdontupload-mcp": "./src/index.mjs"
+  },
+  "files": [
+    "src/index.mjs",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "tools",
+    "privacy",
+    "local-processing",
+    "pdf",
+    "csv",
+    "json",
+    "hash",
+    "encoding"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/etacbae6768-a11y/toolsthatdontupload-mcp"
+  },
+  "homepage": "https://toolsthatdontupload.com",
+  "author": "Tools That Don't Upload <hello@toolsthatdontupload.com>",
+  "engines": {
+    "node": ">=18"
+  }
+}
