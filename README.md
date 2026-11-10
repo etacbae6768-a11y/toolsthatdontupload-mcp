@@ -95,3 +95,7 @@ Your AI assistant calls `search_tools` to find the right tool, then `run_tool` t
 ## License
 
 MIT
+
+---
+
+Listed on: [![Toolsthatdontupload Mcp on AI Agents Listing](https://aiagentslisting.com/toolsthatdontupload-mcp/badge.svg?claim=d5fa0a6f188181d9315d7b5b85957b50)](https://aiagentslisting.com/mcp/toolsthatdontupload-mcp)
