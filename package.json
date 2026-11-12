@@ -1,7 +1,7 @@
 {
   "name": "toolsthatdontupload-mcp",
   "version": "1.0.0",
-  "description": "MCP server for Tools That Don't Upload — 500+ free tools that process files locally, never uploading them to a server.",
+  "description": "stdio bridge to the hosted Tools That Don't Upload MCP server. Requests, including files, are sent to toolsthatdontupload.com and processed in memory; not stored.",
   "license": "MIT",
   "type": "module",
   "bin": {
@@ -16,8 +16,7 @@
     "mcp",
     "model-context-protocol",
     "tools",
-    "privacy",
-    "local-processing",
+    "remote-mcp",
     "pdf",
     "csv",
     "json",

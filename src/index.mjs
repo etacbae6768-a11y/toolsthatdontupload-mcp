@@ -5,13 +5,13 @@
  *
  * This is a thin client that forwards MCP JSON-RPC requests to the public
  * endpoint at https://toolsthatdontupload.com/mcp. The actual tool
- * implementations run on the remote server. File-processing tools run in
- * your browser or on edge workers and never store your files.
+ * implementations run on the remote server: requests, including any file
+ * passed to a tool, are sent to toolsthatdontupload.com, processed in
+ * Cloudflare Workers memory and not stored. Nothing runs locally.
  *
  * Transport: stdio (reads JSON-RPC from stdin, writes to stdout).
  *
- * Usage:
- *   npx toolsthatdontupload-mcp
+ * Usage (not published on npm):
  *   node src/index.mjs
  */
 
@@ -20,7 +20,7 @@ const MCP_ENDPOINT = "https://toolsthatdontupload.com/mcp";
 const MANIFEST = {
   name: "toolsthatdontupload",
   version: "1.0.0",
-  description: "500+ free tools that process files locally. PDF, CSV, JSON, hashing, encoding, and more.",
+  description: "stdio bridge to the hosted Tools That Don't Upload MCP server (requests are sent to toolsthatdontupload.com).",
   homepage: "https://toolsthatdontupload.com",
 };
 

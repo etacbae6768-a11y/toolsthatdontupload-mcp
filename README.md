@@ -1,96 +1,72 @@
-# Tools That Don't Upload — MCP Server
+# Tools That Don't Upload — MCP stdio client
 
-MCP (Model Context Protocol) server for [Tools That Don't Upload](https://toolsthatdontupload.com). Gives your AI assistant access to **500+ free tools** that process data without uploading files to a server.
+A small stdio bridge for MCP clients that cannot connect to a remote MCP server directly. It forwards every request to the hosted MCP server of [Tools That Don't Upload](https://toolsthatdontupload.com) at `https://toolsthatdontupload.com/mcp`.
 
-PDF operations, hashing, encoding, CSV/JSON/XML manipulation, text processing, color conversion, date calculations, network lookups, and more.
+**This package does not process anything on your computer.** Tool calls, including any file you pass to a tool (as base64), are sent over HTTPS to our server, processed in Cloudflare Workers memory to produce the result, and not stored. If your client supports remote MCP servers, connect to the URL directly and you do not need this package.
 
-## Quick Start
+Looking for tools that run entirely on your computer? The Claude plugin in [tools-that-dont-upload](https://github.com/etacbae6768-a11y/tools-that-dont-upload/tree/main/plugin) includes a local server (20 tools, no network requests). The browser tools on [toolsthatdontupload.com](https://toolsthatdontupload.com) also keep files on your device.
 
-### Claude Desktop
+## Use
 
-Add to `claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "toolsthatdontupload": {
-      "command": "npx",
-      "args": ["-y", "toolsthatdontupload-mcp"]
-    }
-  }
-}
-```
-
-### Cursor / Windsurf
-
-Add to your MCP settings:
-
-```json
-{
-  "mcpServers": {
-    "toolsthatdontupload": {
-      "command": "npx",
-      "args": ["-y", "toolsthatdontupload-mcp"]
-    }
-  }
-}
-```
-
-### Remote URL (no install)
-
-If your MCP client supports remote servers:
+### Recommended: connect to the remote server directly
 
 ```
 https://toolsthatdontupload.com/mcp
 ```
 
-## How It Works
+Claude Code:
 
-This package is a thin MCP client that forwards requests to the public API at `https://toolsthatdontupload.com/mcp`. The actual tools run on Cloudflare Workers.
+```
+claude mcp add --transport http tools-that-dont-upload https://toolsthatdontupload.com/mcp
+```
 
-Three meta-tools are exposed:
+Setup for other clients: https://toolsthatdontupload.com/docs/mcp/
+
+### This stdio bridge
+
+This package is **not published on npm**. Clone the repository and point your client at the script (Node.js 18 or later):
+
+```json
+{
+  "mcpServers": {
+    "toolsthatdontupload": {
+      "command": "node",
+      "args": ["/path/to/toolsthatdontupload-mcp/src/index.mjs"]
+    }
+  }
+}
+```
+
+The bridge does not send an API key, so anonymous limits apply (see below).
+
+## How it works
+
+`tools/list` returns three tools; every `tools/call` is forwarded unchanged to the remote server.
 
 | Tool | Description |
 |---|---|
-| `search_tools` | Search 500+ tools by keyword. Returns names, descriptions, parameters, and example arguments. |
-| `run_tool` | Run any tool by name with arguments. |
-| `list_categories` | Browse tool categories with counts. |
+| `search_tools` | Search the tool catalog by keyword. Returns names, descriptions, parameters and an example argument object. |
+| `run_tool` | Run a catalog tool by name with arguments. |
+| `list_categories` | List tool categories with counts. |
 
-Your AI assistant calls `search_tools` to find the right tool, then `run_tool` to execute it.
+The catalog covers text and Markdown, JSON/CSV/XML/YAML, dates, math, hashing and encoding, PDF merge/split/rotate, network lookups, Korean text tools and a few AI tools. The remote server also has tools that this bridge does not list (for example HWP/HWPX conversion and saved file flows); connect to the remote URL to use them.
 
-## Categories
+## Where your data goes
 
-| Category | Tools | Examples |
-|---|---|---|
-| Text & Markdown | 90 | diff, html_clean, markdown_toc, regex_match |
-| Data (JSON, CSV, XML) | 81 | csv_filter, json_flatten, xml_to_json, yaml_parse |
-| Date & time | 45 | business_days, cron_parse, timezone_convert |
-| Math & finance | 44 | compound_interest, percentage, unit_price |
-| Miscellaneous | 44 | api_mock, qr_code, uuid, word_count |
-| Arrays & objects | 33 | array_chunk, array_sort, object_diff, object_merge |
-| Web & HTTP | 25 | accept_header, cookie_parse, cors_headers, url_parse |
-| Crypto & hashing | 24 | aes_encrypt, hash, hmac, sha256, jwt_decode |
-| Encoding | 22 | base64, hex, html_entities, url_encode |
-| Network | 20 | dns_lookup, domain_age, favicon, ssl_check, whois |
-| Generators | 17 | barcode, fake_data, lorem_ipsum, password, uuid |
-| Color | 14 | color_blend, color_contrast, color_convert, color_gradient |
-| Unit conversion | 13 | length, temperature, weight, data_size |
-| AI | 3 | ai_ocr, ai_summarize, ai_translate |
-| Image | 2 | avatar_svg, placeholder |
-| Validation | 2 | is_json, json_schema_validate |
-
-## Privacy
-
-- **File-processing tools** (PDF, images, etc.) run in your browser or on edge workers. Files are processed in memory and never stored.
-- **Network tools** (dns_lookup, whois, etc.) send only the queried hostname to public DNS/WHOIS services.
-- **No tracking.** No analytics cookies. Minimal server logs (timestamp, tool name, status code). No file content is logged.
-- See the full [privacy policy](https://toolsthatdontupload.com/privacy/).
+- **All tools**: the request (and any file in it) goes to `toolsthatdontupload.com` and is processed in Cloudflare Workers memory. We do not store request content.
+- **Network tools** (fetch a URL, DNS, WHOIS, SSL): our server contacts the host you name.
+- **AI tools**: text is sent to Cloudflare Workers AI.
+- Each result lists the external hosts contacted in `_meta["com.toolsthatdontupload/egress"]`.
+- Full policy: https://toolsthatdontupload.com/privacy/
 
 ## Limits
 
-- Free tier: 50 requests/day, 10 MB max file size via MCP, 2 MiB max JSON body.
-- API key (free): 1,000 requests/day. Get one at [toolsthatdontupload.com/keys](https://toolsthatdontupload.com/keys/).
-- Paid plans available for higher limits.
+The same limits as the hosted API ([pricing](https://toolsthatdontupload.com/pricing/)):
+
+- Without a key: compute tools under fair use (rate limited); file tools 20 calls/day and AI tools 10 calls/day per IP address, reset at 00:00 UTC; network tools need a key.
+- Free API key: 1,000 credits/month, plus a daily allowance of 20 file and 10 AI calls per key; unlocks network tools. Get one at https://toolsthatdontupload.com/api-keys/ (this bridge does not send keys; connect to the remote URL with an `X-API-Key` header to use one).
+- Files through MCP: up to 10 MB. Tool results: up to 2 MiB.
+- Paid plans are listed on the pricing page; checkout is not open yet.
 
 ## License
 
